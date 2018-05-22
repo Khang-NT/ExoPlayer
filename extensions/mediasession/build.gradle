@@ -21,6 +21,11 @@ android {
         minSdkVersion config.minSdkVersion
         targetSdkVersion config.targetSdkVersion
     }
+
+    lintOptions {
+        // todo: wait for version 2.8.1 to remove this
+        disable 'InvalidPackage'
+    }
 }
 
 dependencies {
