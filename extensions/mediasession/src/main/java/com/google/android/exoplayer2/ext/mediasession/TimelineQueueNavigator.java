@@ -28,12 +28,17 @@ import com.google.android.exoplayer2.util.Util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * An abstract implementation of the {@link MediaSessionConnector.QueueNavigator} that maps the
  * windows of a {@link Player}'s {@link Timeline} to the media session queue.
  */
 public abstract class TimelineQueueNavigator implements MediaSessionConnector.QueueNavigator {
+  public interface FloatingQueueCallback {
+    void onComplete(List<MediaSessionCompat.QueueItem> queue);
+  }
 
   public static final long MAX_POSITION_FOR_SEEK_TO_PREVIOUS = 3000;
   public static final int DEFAULT_MAX_QUEUE_SIZE = 10;
@@ -42,6 +47,8 @@ public abstract class TimelineQueueNavigator implements MediaSessionConnector.Qu
   protected final int maxQueueSize;
 
   private long activeQueueItemId;
+
+  private AtomicInteger nextId = new AtomicInteger(0);
 
   /**
    * Creates an instance for a given {@link MediaSessionCompat}.
@@ -71,13 +78,14 @@ public abstract class TimelineQueueNavigator implements MediaSessionConnector.Qu
   }
 
   /**
-   * Gets the {@link MediaDescriptionCompat} for a given timeline window index.
-   *
-   * @param player The current player.
-   * @param windowIndex The timeline window index for which to provide a description.
-   * @return A {@link MediaDescriptionCompat}.
+   * Gets the {@link MediaDescriptionCompat} for a given range window index.
    */
-  public abstract MediaDescriptionCompat getMediaDescription(Player player, int windowIndex);
+  public abstract void getMediaDescriptions(
+          Player player,
+          int startIndex,
+          int length,
+          FloatingQueueCallback callback
+  );
 
   @Override
   public long getSupportedQueueNavigatorActions(Player player) {
@@ -180,16 +188,20 @@ public abstract class TimelineQueueNavigator implements MediaSessionConnector.Qu
       return;
     }
     int windowCount = player.getCurrentTimeline().getWindowCount();
-    int currentWindowIndex = player.getCurrentWindowIndex();
+    final int currentWindowIndex = player.getCurrentWindowIndex();
     int queueSize = Math.min(maxQueueSize, windowCount);
     int startIndex = Util.constrainValue(currentWindowIndex - ((queueSize - 1) / 2), 0,
         windowCount - queueSize);
-    List<MediaSessionCompat.QueueItem> queue = new ArrayList<>();
-    for (int i = startIndex; i < startIndex + queueSize; i++) {
-      queue.add(new MediaSessionCompat.QueueItem(getMediaDescription(player, i), i));
-    }
-    mediaSession.setQueue(queue);
-    activeQueueItemId = currentWindowIndex;
+    final int id = nextId.getAndIncrement();
+    getMediaDescriptions(player, startIndex, queueSize, new FloatingQueueCallback() {
+      @Override
+      public void onComplete(List<MediaSessionCompat.QueueItem> queue) {
+        if (id == nextId.get()) {
+          mediaSession.setQueue(queue);
+          activeQueueItemId = currentWindowIndex;
+        }
+      }
+    });
   }
 
 }
