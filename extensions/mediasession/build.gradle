@@ -11,24 +11,31 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+apply from: '../../constants.gradle'
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion config.compileSdkVersion
-    buildToolsVersion config.buildToolsVersion
+    compileSdkVersion project.ext.compileSdkVersion
+    buildToolsVersion project.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion config.minSdkVersion
-        targetSdkVersion config.targetSdkVersion
-    }
-
-    lintOptions {
-        // todo: wait for version 2.8.1 to remove this
-        disable 'InvalidPackage'
+        minSdkVersion project.ext.minSdkVersion
+        targetSdkVersion project.ext.targetSdkVersion
     }
 }
 
 dependencies {
-    implementation "com.google.android.exoplayer:exoplayer-core:$exoPlayerVersion"
-    implementation "com.android.support:support-media-compat:$supportLibVersion"
+    implementation project(modulePrefix + 'library-core')
+    implementation 'com.android.support:support-media-compat:' + supportLibraryVersion
 }
+
+ext {
+    javadocTitle = 'Media session extension'
+}
+apply from: '../../javadoc_library.gradle'
+
+ext {
+    releaseArtifact = 'extension-mediasession'
+    releaseDescription = 'Media session extension for ExoPlayer.'
+}
+apply from: '../../publish.gradle'
