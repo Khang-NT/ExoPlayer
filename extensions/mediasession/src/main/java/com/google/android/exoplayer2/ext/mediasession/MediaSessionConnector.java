@@ -383,8 +383,8 @@ public final class MediaSessionConnector {
      *
      * @param mediaSession The {@link MediaSessionCompat} to connect to.
      */
-    public MediaSessionConnector(MediaSessionCompat mediaSession) {
-        this(mediaSession, null);
+    public MediaSessionConnector(MediaSessionCompat mediaSession, @Nullable Looper looper) {
+        this(mediaSession, null, looper);
     }
 
     /**
@@ -397,8 +397,10 @@ public final class MediaSessionConnector {
      * @param playbackController A {@link PlaybackController} for handling playback actions.
      */
     public MediaSessionConnector(
-            MediaSessionCompat mediaSession, PlaybackController playbackController) {
-        this(mediaSession, playbackController, true, null);
+            MediaSessionCompat mediaSession,
+            PlaybackController playbackController,
+            @Nullable Looper looper) {
+        this(mediaSession, playbackController, true, looper, null);
     }
 
     /**
@@ -418,13 +420,13 @@ public final class MediaSessionConnector {
             MediaSessionCompat mediaSession,
             PlaybackController playbackController,
             boolean doMaintainMetadata,
+            @Nullable Looper looper,
             @Nullable String metadataExtrasPrefix) {
         this.mediaSession = mediaSession;
         this.playbackController = playbackController != null ? playbackController
                 : new DefaultPlaybackController();
         this.metadataExtrasPrefix = metadataExtrasPrefix != null ? metadataExtrasPrefix : "";
-        this.handler = new Handler(Looper.myLooper() != null ? Looper.myLooper()
-                : Looper.getMainLooper());
+        this.handler = new Handler(looper != null ? looper : Looper.getMainLooper());
         this.doMaintainMetadata = doMaintainMetadata;
         mediaSession.setFlags(BASE_MEDIA_SESSION_FLAGS);
         mediaController = mediaSession.getController();
