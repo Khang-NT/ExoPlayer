@@ -113,7 +113,7 @@ public class DefaultTrackNameProvider implements TrackNameProvider {
     return itemList;
   }
 
-  private static int inferPrimaryTrackType(Format format) {
+  public static int inferPrimaryTrackType(Format format) {
     int trackType = MimeTypes.getTrackType(format.sampleMimeType);
     if (trackType != C.TRACK_TYPE_UNKNOWN) {
       return trackType;
