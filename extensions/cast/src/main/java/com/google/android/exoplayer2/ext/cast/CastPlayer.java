@@ -563,6 +563,13 @@ public final class CastPlayer implements Player {
     return getCurrentPosition();
   }
 
+  public PendingResult<MediaChannelResult> setStreamVolume(float volume) {
+    if (remoteMediaClient != null) {
+      return remoteMediaClient.setStreamVolume(volume);
+    }
+    return null;
+  }
+
   // Internal methods.
 
   public void updateInternalState() {
