@@ -41,6 +41,7 @@ import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.SessionManager;
 import com.google.android.gms.cast.framework.SessionManagerListener;
+import com.google.android.gms.cast.framework.media.MediaQueue;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient.MediaChannelResult;
 import com.google.android.gms.common.api.PendingResult;
@@ -226,6 +227,13 @@ public final class CastPlayer implements Player {
   public PendingResult<MediaChannelResult> removeItem(int periodId) {
     if (getMediaStatus() != null && currentTimeline.getIndexOfPeriod(periodId) != C.INDEX_UNSET) {
       return remoteMediaClient.queueRemoveItem(periodId, null);
+    }
+    return null;
+  }
+
+  public PendingResult<MediaChannelResult> removeItems(int... periodIds) {
+    if (getMediaStatus() != null) {
+      return remoteMediaClient.queueRemoveItems(periodIds, null);
     }
     return null;
   }
@@ -574,9 +582,21 @@ public final class CastPlayer implements Player {
     return null;
   }
 
+  public PendingResult<MediaChannelResult> setPlaybackRate(float rate) {
+    if (remoteMediaClient != null) {
+      return remoteMediaClient.setPlaybackRate(rate);
+    }
+    return null;
+  }
+
+  @Nullable
+  public MediaQueue getMediaQueue() {
+    return remoteMediaClient != null ? remoteMediaClient.getMediaQueue() : null;
+  }
+
   // Internal methods.
 
-  public void updateInternalState() {
+  private void updateInternalState() {
     if (remoteMediaClient == null) {
       // There is no session. We leave the state of the player as it is now.
       return;
