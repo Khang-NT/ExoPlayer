@@ -20,6 +20,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.IllegalSeekPositionException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.Timeline;
@@ -353,6 +354,9 @@ public final class CastPlayer implements Player {
     positionMs = positionMs != C.TIME_UNSET ? positionMs : 0;
     if (mediaStatus != null) {
       if (getCurrentWindowIndex() != windowIndex) {
+        if (windowIndex < 0 || windowIndex >= currentTimeline.getWindowCount()) {
+          throw new IllegalSeekPositionException(currentTimeline, windowIndex, positionMs);
+        }
         remoteMediaClient.queueJumpToItem((int) currentTimeline.getPeriod(windowIndex, period).uid,
             positionMs, null).setResultCallback(seekResultCallback);
       } else {
