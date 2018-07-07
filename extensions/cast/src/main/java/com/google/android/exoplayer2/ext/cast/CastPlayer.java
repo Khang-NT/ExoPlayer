@@ -594,6 +594,10 @@ public final class CastPlayer implements Player {
     return remoteMediaClient != null ? remoteMediaClient.getMediaQueue() : null;
   }
 
+  public void togglePlayback() {
+    if (remoteMediaClient != null) remoteMediaClient.togglePlayback();
+  }
+
   // Internal methods.
 
   private void updateInternalState() {
