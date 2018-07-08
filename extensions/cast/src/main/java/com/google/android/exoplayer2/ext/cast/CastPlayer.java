@@ -589,9 +589,12 @@ public final class CastPlayer implements Player {
     return null;
   }
 
-  @Nullable
-  public MediaQueue getMediaQueue() {
+  public @Nullable MediaQueue getMediaQueue() {
     return remoteMediaClient != null ? remoteMediaClient.getMediaQueue() : null;
+  }
+
+  public @Nullable MediaStatus getMediaStatus() {
+    return remoteMediaClient != null ? remoteMediaClient.getMediaStatus() : null;
   }
 
   public void togglePlayback() {
@@ -623,6 +626,16 @@ public final class CastPlayer implements Player {
         listener.onRepeatModeChanged(repeatMode);
       }
     }
+    maybeUpdateCurrentWindowIndexAndNotify();
+    if (updateTracksAndSelections()) {
+      for (EventListener listener : listeners) {
+        listener.onTracksChanged(currentTrackGroups, currentTrackSelection);
+      }
+    }
+    maybeUpdateTimelineAndNotify();
+  }
+
+  private void maybeUpdateCurrentWindowIndexAndNotify() {
     int currentWindowIndex = fetchCurrentWindowIndex(getMediaStatus());
     if (this.currentWindowIndex != currentWindowIndex && pendingSeekCount == 0) {
       this.currentWindowIndex = currentWindowIndex;
@@ -630,12 +643,6 @@ public final class CastPlayer implements Player {
         listener.onPositionDiscontinuity(DISCONTINUITY_REASON_PERIOD_TRANSITION);
       }
     }
-    if (updateTracksAndSelections()) {
-      for (EventListener listener : listeners) {
-        listener.onTracksChanged(currentTrackGroups, currentTrackSelection);
-      }
-    }
-    maybeUpdateTimelineAndNotify();
   }
 
   private void maybeUpdateTimelineAndNotify() {
@@ -733,10 +740,6 @@ public final class CastPlayer implements Player {
     }
   }
 
-  private @Nullable MediaStatus getMediaStatus() {
-    return remoteMediaClient != null ? remoteMediaClient.getMediaStatus() : null;
-  }
-
   /**
    * Retrieves the playback state from {@code remoteMediaClient} and maps it into a {@link Player}
    * state
@@ -822,7 +825,9 @@ public final class CastPlayer implements Player {
   }
 
   private final class StatusListener implements RemoteMediaClient.Listener,
-      SessionManagerListener<CastSession>, RemoteMediaClient.ProgressListener {
+      SessionManagerListener<CastSession>, RemoteMediaClient.ProgressListener,
+          ResultCallback<MediaChannelResult> {
+    private PendingResult<MediaChannelResult> pendingQueueStatusRequest;
 
     // RemoteMediaClient.ProgressListener implementation.
 
@@ -836,6 +841,15 @@ public final class CastPlayer implements Player {
     @Override
     public void onStatusUpdated() {
       updateInternalState();
+      if (getMediaStatus() != null && getMediaQueue() != null
+              && getMediaStatus().getQueueItems().isEmpty()
+              && getMediaQueue().getItemCount() > 0
+              && pendingQueueStatusRequest == null) {
+        // detect mediaStatus invalid state -> request new status
+        // this may happen when an item in queue failed to play
+        pendingQueueStatusRequest = remoteMediaClient.requestStatus();
+        pendingQueueStatusRequest.setResultCallback(this);
+      }
     }
 
     @Override
@@ -844,6 +858,7 @@ public final class CastPlayer implements Player {
     @Override
     public void onQueueStatusUpdated() {
       maybeUpdateTimelineAndNotify();
+      maybeUpdateCurrentWindowIndexAndNotify();
     }
 
     @Override
@@ -905,6 +920,12 @@ public final class CastPlayer implements Player {
       // Do nothing.
     }
 
+    // ResultCallback<MediaChannelResult> area
+
+    @Override
+    public void onResult(@NonNull MediaChannelResult mediaChannelResult) {
+      pendingQueueStatusRequest = null;
+    }
   }
 
   // Result callbacks hooks.
