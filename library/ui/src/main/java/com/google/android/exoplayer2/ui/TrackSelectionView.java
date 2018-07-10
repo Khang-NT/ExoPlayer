@@ -21,6 +21,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.support.annotation.AttrRes;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -61,18 +62,18 @@ public class TrackSelectionView extends LinearLayout {
   /**
    * Gets a pair consisting of a dialog and the {@link TrackSelectionView} that will be shown by it.
    *
-   * @param activity The parent activity.
+   * @param context The context to create dialog.
    * @param title The dialog's title.
    * @param trackSelector The track selector.
    * @param rendererIndex The index of the renderer.
    * @return The dialog and the {@link TrackSelectionView} that will be shown by it.
    */
   public static Pair<AlertDialog, TrackSelectionView> getDialog(
-      Activity activity,
+      Context context,
       CharSequence title,
       DefaultTrackSelector trackSelector,
       int rendererIndex) {
-    AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+    AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
     // Inflate with the builder's context to ensure the correct style is used.
     LayoutInflater dialogInflater = LayoutInflater.from(builder.getContext());
