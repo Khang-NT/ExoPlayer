@@ -589,6 +589,13 @@ public final class CastPlayer implements Player {
     return null;
   }
 
+  public PendingResult<MediaChannelResult> setActiveMediaTracks(long... trackIds) {
+    if (remoteMediaClient != null) {
+      return remoteMediaClient.setActiveMediaTracks(trackIds);
+    }
+    return null;
+  }
+
   public @Nullable MediaQueue getMediaQueue() {
     return remoteMediaClient != null ? remoteMediaClient.getMediaQueue() : null;
   }
