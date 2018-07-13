@@ -24,6 +24,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.RectF;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -1176,9 +1177,14 @@ public class PlayerView extends FrameLayout {
     // TextOutput implementation
 
     @Override
-    public void onCues(List<Cue> cues) {
+    public void onCues(final List<Cue> cues) {
       if (subtitleView != null) {
-        subtitleView.onCues(cues);
+        uiThread(new Runnable() {
+          @Override
+          public void run() {
+            subtitleView.onCues(cues);
+          }
+        });
       }
     }
 
@@ -1186,64 +1192,100 @@ public class PlayerView extends FrameLayout {
 
     @Override
     public void onVideoSizeChanged(
-        int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
+            final int width,
+            final int height,
+            final int unappliedRotationDegrees,
+            final float pixelWidthHeightRatio) {
       if (contentFrame == null) {
         return;
       }
-      float videoAspectRatio =
-          (height == 0 || width == 0) ? 1 : (width * pixelWidthHeightRatio) / height;
+      uiThread(new Runnable() {
+        @Override
+        public void run() {
+          float videoAspectRatio =
+                  (height == 0 || width == 0) ? 1 : (width * pixelWidthHeightRatio) / height;
 
-      if (surfaceView instanceof TextureView) {
-        // Try to apply rotation transformation when our surface is a TextureView.
-        if (unappliedRotationDegrees == 90 || unappliedRotationDegrees == 270) {
-          // We will apply a rotation 90/270 degree to the output texture of the TextureView.
-          // In this case, the output video's width and height will be swapped.
-          videoAspectRatio = 1 / videoAspectRatio;
-        }
-        if (textureViewRotation != 0) {
-          surfaceView.removeOnLayoutChangeListener(this);
-        }
-        textureViewRotation = unappliedRotationDegrees;
-        if (textureViewRotation != 0) {
-          // The texture view's dimensions might be changed after layout step.
-          // So add an OnLayoutChangeListener to apply rotation after layout step.
-          surfaceView.addOnLayoutChangeListener(this);
-        }
-        applyTextureViewRotation((TextureView) surfaceView, textureViewRotation);
-      }
+          if (surfaceView instanceof TextureView) {
+            // Try to apply rotation transformation when our surface is a TextureView.
+            if (unappliedRotationDegrees == 90 || unappliedRotationDegrees == 270) {
+              // We will apply a rotation 90/270 degree to the output texture of the TextureView.
+              // In this case, the output video's width and height will be swapped.
+              videoAspectRatio = 1 / videoAspectRatio;
+            }
+            if (textureViewRotation != 0) {
+              surfaceView.removeOnLayoutChangeListener(ComponentListener.this);
+            }
+            textureViewRotation = unappliedRotationDegrees;
+            if (textureViewRotation != 0) {
+              // The texture view's dimensions might be changed after layout step.
+              // So add an OnLayoutChangeListener to apply rotation after layout step.
+              surfaceView.addOnLayoutChangeListener(ComponentListener.this);
+            }
+            applyTextureViewRotation((TextureView) surfaceView, textureViewRotation);
+          }
 
-      contentFrame.setAspectRatio(videoAspectRatio);
+          contentFrame.setAspectRatio(videoAspectRatio);
+        }
+      });
     }
 
     @Override
     public void onRenderedFirstFrame() {
-      if (shutterView != null) {
-        shutterView.setVisibility(INVISIBLE);
-      }
+      uiThread(new Runnable() {
+        @Override
+        public void run() {
+          if (shutterView != null) {
+            shutterView.setVisibility(INVISIBLE);
+          }
+        }
+      });
     }
 
     @Override
     public void onTracksChanged(TrackGroupArray tracks, TrackSelectionArray selections) {
-      updateForCurrentTrackSelections(/* isNewPlayer= */ false);
+      uiThread(new Runnable() {
+        @Override
+        public void run() {
+          updateForCurrentTrackSelections(/* isNewPlayer= */ false);
+        }
+      });
     }
 
     // Player.EventListener implementation
 
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-      updateBuffering();
-      updateErrorMessage();
-      if (isPlayingAd() && controllerHideDuringAds) {
-        hideController();
-      } else {
-        maybeShowController(false);
-      }
+      uiThread(new Runnable() {
+        @Override
+        public void run() {
+          updateBuffering();
+          updateErrorMessage();
+          if (isPlayingAd() && controllerHideDuringAds) {
+            hideController();
+          } else {
+            maybeShowController(false);
+          }
+        }
+      });
     }
 
     @Override
     public void onPositionDiscontinuity(@DiscontinuityReason int reason) {
-      if (isPlayingAd() && controllerHideDuringAds) {
-        hideController();
+      uiThread(new Runnable() {
+        @Override
+        public void run() {
+          if (isPlayingAd() && controllerHideDuringAds) {
+            hideController();
+          }
+        }
+      });
+    }
+
+    private void uiThread(Runnable runnable) {
+      if (Looper.getMainLooper() == Looper.myLooper()) {
+        runnable.run();
+      } else {
+        post(runnable);
       }
     }
 
