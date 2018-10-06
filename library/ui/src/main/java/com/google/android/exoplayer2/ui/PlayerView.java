@@ -501,14 +501,10 @@ public class PlayerView extends FrameLayout {
    * calling {@code setPlayer(null)} to detach it from the old one. This ordering is significantly
    * more efficient and may allow for more seamless transitions.
    *
-   * @param player The {@link Player} to use, or {@code null} to detach the current player. Only
-   *     players which are accessed on the main thread are supported ({@code
-   *     player.getApplicationLooper() == Looper.getMainLooper()}).
+   * @param player The {@link Player} to use, or {@code null} to detach the current player.
    */
   public void setPlayer(@Nullable Player player) {
     Assertions.checkState(Looper.myLooper() == Looper.getMainLooper());
-    Assertions.checkArgument(
-        player == null || player.getApplicationLooper() == Looper.getMainLooper());
     if (this.player == player) {
       return;
     }
