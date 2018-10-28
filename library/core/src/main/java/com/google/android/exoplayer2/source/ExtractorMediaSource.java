@@ -78,6 +78,7 @@ public final class ExtractorMediaSource extends BaseMediaSource
 
     private @Nullable ExtractorsFactory extractorsFactory;
     private @Nullable String customCacheKey;
+    private @C.SelectionFlags int additionSelectionFlag;
     private @Nullable Object tag;
     private LoadErrorHandlingPolicy loadErrorHandlingPolicy;
     private int continueLoadingCheckIntervalBytes;
@@ -137,6 +138,11 @@ public final class ExtractorMediaSource extends BaseMediaSource
     public Factory setTag(Object tag) {
       Assertions.checkState(!isCreateCalled);
       this.tag = tag;
+      return this;
+    }
+
+    public Factory setAdditionSelectionFlag(@C.SelectionFlags int additionSelectionFlag) {
+      this.additionSelectionFlag = additionSelectionFlag;
       return this;
     }
 
@@ -209,6 +215,7 @@ public final class ExtractorMediaSource extends BaseMediaSource
           extractorsFactory,
           loadErrorHandlingPolicy,
           customCacheKey,
+          additionSelectionFlag,
           continueLoadingCheckIntervalBytes,
           tag);
     }
@@ -244,6 +251,7 @@ public final class ExtractorMediaSource extends BaseMediaSource
   private final ExtractorsFactory extractorsFactory;
   private final LoadErrorHandlingPolicy loadableLoadErrorHandlingPolicy;
   private final String customCacheKey;
+  private final @C.SelectionFlags int additionSelectionFlag;
   private final int continueLoadingCheckIntervalBytes;
   private final @Nullable Object tag;
 
@@ -269,7 +277,7 @@ public final class ExtractorMediaSource extends BaseMediaSource
       ExtractorsFactory extractorsFactory,
       Handler eventHandler,
       EventListener eventListener) {
-    this(uri, dataSourceFactory, extractorsFactory, eventHandler, eventListener, null);
+    this(uri, dataSourceFactory, extractorsFactory, eventHandler, eventListener, null, 0);
   }
 
   /**
@@ -292,7 +300,8 @@ public final class ExtractorMediaSource extends BaseMediaSource
       ExtractorsFactory extractorsFactory,
       Handler eventHandler,
       EventListener eventListener,
-      String customCacheKey) {
+      String customCacheKey,
+      int additionSelectionFlag) {
     this(
         uri,
         dataSourceFactory,
@@ -300,6 +309,7 @@ public final class ExtractorMediaSource extends BaseMediaSource
         eventHandler,
         eventListener,
         customCacheKey,
+        additionSelectionFlag,
         DEFAULT_LOADING_CHECK_INTERVAL_BYTES);
   }
 
@@ -326,6 +336,7 @@ public final class ExtractorMediaSource extends BaseMediaSource
       Handler eventHandler,
       EventListener eventListener,
       String customCacheKey,
+      int additionSelectionFlag,
       int continueLoadingCheckIntervalBytes) {
     this(
         uri,
@@ -333,6 +344,7 @@ public final class ExtractorMediaSource extends BaseMediaSource
         extractorsFactory,
         new DefaultLoadErrorHandlingPolicy(),
         customCacheKey,
+        additionSelectionFlag,
         continueLoadingCheckIntervalBytes,
         /* tag= */ null);
     if (eventListener != null && eventHandler != null) {
@@ -346,6 +358,7 @@ public final class ExtractorMediaSource extends BaseMediaSource
       ExtractorsFactory extractorsFactory,
       LoadErrorHandlingPolicy loadableLoadErrorHandlingPolicy,
       @Nullable String customCacheKey,
+      @C.SelectionFlags int additionSelectionFlag,
       int continueLoadingCheckIntervalBytes,
       @Nullable Object tag) {
     this.uri = uri;
@@ -353,6 +366,7 @@ public final class ExtractorMediaSource extends BaseMediaSource
     this.extractorsFactory = extractorsFactory;
     this.loadableLoadErrorHandlingPolicy = loadableLoadErrorHandlingPolicy;
     this.customCacheKey = customCacheKey;
+    this.additionSelectionFlag = additionSelectionFlag;
     this.continueLoadingCheckIntervalBytes = continueLoadingCheckIntervalBytes;
     this.timelineDurationUs = C.TIME_UNSET;
     this.tag = tag;
@@ -387,6 +401,7 @@ public final class ExtractorMediaSource extends BaseMediaSource
         this,
         allocator,
         customCacheKey,
+        additionSelectionFlag,
         continueLoadingCheckIntervalBytes);
   }
 

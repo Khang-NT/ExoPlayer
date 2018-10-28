@@ -86,6 +86,7 @@ import org.checkerframework.checker.nullness.compatqual.NullableType;
   private final Listener listener;
   private final Allocator allocator;
   private final @Nullable String customCacheKey;
+  private final @C.SelectionFlags int additionSelectionFlag;
   private final long continueLoadingCheckIntervalBytes;
   private final Loader loader;
   private final ExtractorHolder extractorHolder;
@@ -144,6 +145,7 @@ import org.checkerframework.checker.nullness.compatqual.NullableType;
       Listener listener,
       Allocator allocator,
       @Nullable String customCacheKey,
+      @C.SelectionFlags int additionSelectionFlag,
       int continueLoadingCheckIntervalBytes) {
     this.uri = uri;
     this.dataSource = dataSource;
@@ -152,6 +154,7 @@ import org.checkerframework.checker.nullness.compatqual.NullableType;
     this.listener = listener;
     this.allocator = allocator;
     this.customCacheKey = customCacheKey;
+    this.additionSelectionFlag = additionSelectionFlag;
     this.continueLoadingCheckIntervalBytes = continueLoadingCheckIntervalBytes;
     loader = new Loader("Loader:ExtractorMediaPeriod");
     extractorHolder = new ExtractorHolder(extractors);
@@ -653,6 +656,7 @@ import org.checkerframework.checker.nullness.compatqual.NullableType;
     durationUs = seekMap.getDurationUs();
     for (int i = 0; i < trackCount; i++) {
       Format trackFormat = sampleQueues[i].getUpstreamFormat();
+      trackFormat = trackFormat.copyWithSelectionFlag(trackFormat.selectionFlags | additionSelectionFlag);
       trackArray[i] = new TrackGroup(trackFormat);
       String mimeType = trackFormat.sampleMimeType;
       boolean isAudioVideo = MimeTypes.isVideo(mimeType) || MimeTypes.isAudio(mimeType);

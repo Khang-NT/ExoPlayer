@@ -158,6 +158,8 @@ public class EventLogger implements AnalyticsListener {
               + window.isSeekable
               + ", "
               + window.isDynamic
+              + ", "
+              + window.tag
               + "]");
     }
     if (windowCount > MAX_TIMELINE_ITEM_LINES) {
