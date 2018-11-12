@@ -1,10 +1,61 @@
 # Release notes #
 
+### 2.9.1 ###
+
+* Add convenience methods `Player.next`, `Player.previous`, `Player.hasNext`
+  and `Player.hasPrevious`
+  ([#4863](https://github.com/google/ExoPlayer/issues/4863)).
+* Improve initial bandwidth meter estimates using the current country and
+  network type.
+* IMA extension:
+  * For preroll to live stream transitions, project forward the loading position
+    to avoid being behind the live window.
+  * Let apps specify whether to focus the skip button on ATV
+    ([#5019](https://github.com/google/ExoPlayer/issues/5019)).
+* MP3:
+  * Support seeking based on MLLT metadata
+    ([#3241](https://github.com/google/ExoPlayer/issues/3241)).
+  * Fix handling of streams with appended data
+    ([#4954](https://github.com/google/ExoPlayer/issues/4954)).
+* DASH: Parse ProgramInformation element if present in the manifest.
+* HLS:
+  * Add constructor to `DefaultHlsExtractorFactory` for adding TS payload
+    reader factory flags
+  * Fix bug in segment sniffing
+    ([#5039](https://github.com/google/ExoPlayer/issues/5039)).
+  ([#4861](https://github.com/google/ExoPlayer/issues/4861)).
+* SubRip: Add support for alignment tags, and remove tags from the displayed
+  captions ([#4306](https://github.com/google/ExoPlayer/issues/4306)).
+* Fix issue with blind seeking to windows with non-zero offset in a
+  `ConcatenatingMediaSource`
+  ([#4873](https://github.com/google/ExoPlayer/issues/4873)).
+* Fix logic for enabling next and previous actions in `TimelineQueueNavigator`
+  ([#5065](https://github.com/google/ExoPlayer/issues/5065)).
+* Fix issue where audio focus handling could not be disabled after enabling it
+  ([#5055](https://github.com/google/ExoPlayer/issues/5055)).
+* Fix issue where subtitles were positioned incorrectly if `SubtitleView` had a
+  non-zero position offset to its parent
+  ([#4788](https://github.com/google/ExoPlayer/issues/4788)).
+* Fix issue where the buffered position was not updated correctly when
+  transitioning between periods
+  ([#4899](https://github.com/google/ExoPlayer/issues/4899)).
+* Fix issue where a `NullPointerException` is thrown when removing an unprepared
+  media source from a `ConcatenatingMediaSource` with the `useLazyPreparation`
+  option enabled ([#4986](https://github.com/google/ExoPlayer/issues/4986)).
+* Work around an issue where a non-empty end-of-stream audio buffer would be
+  output with timestamp zero, causing the player position to jump backwards
+  ([#5045](https://github.com/google/ExoPlayer/issues/5045)).
+* Suppress a spurious assertion failure on some Samsung devices
+  ([#4532](https://github.com/google/ExoPlayer/issues/4532)).
+* Suppress spurious "references unknown class member" shrinking warning
+  ([#4890](https://github.com/google/ExoPlayer/issues/4890)).
+* Swap recommended order for google() and jcenter() in gradle config
+  ([#4997](https://github.com/google/ExoPlayer/issues/4997)).
+
 ### 2.9.0 ###
 
-* Turn on Java 8 compiler support for the ExoPlayer library. Apps that depend
-  on ExoPlayer via its source code rather than an AAR may need to add
-  `compileOptions { targetCompatibility JavaVersion.VERSION_1_8 }` to their
+* Turn on Java 8 compiler support for the ExoPlayer library. Apps may need to
+  add `compileOptions { targetCompatibility JavaVersion.VERSION_1_8 }` to their
   gradle settings to ensure bytecode compatibility.
 * Set `compileSdkVersion` and `targetSdkVersion` to 28.
 * Support for automatic audio focus handling via
@@ -326,18 +377,18 @@
     begins, and poll the audio timestamp less frequently once it starts
     advancing ([#3841](https://github.com/google/ExoPlayer/issues/3841)).
   * Add an option to skip silent audio in `PlaybackParameters`
-    ((#2635)[https://github.com/google/ExoPlayer/issues/2635]).
+    ([#2635](https://github.com/google/ExoPlayer/issues/2635)).
   * Fix an issue where playback of TrueHD streams would get stuck after seeking
     due to not finding a syncframe
-    ((#3845)[https://github.com/google/ExoPlayer/issues/3845]).
+    ([#3845](https://github.com/google/ExoPlayer/issues/3845)).
   * Fix an issue with eac3-joc playback where a codec would fail to configure
-    ((#4165)[https://github.com/google/ExoPlayer/issues/4165]).
+    ([#4165](https://github.com/google/ExoPlayer/issues/4165)).
   * Handle non-empty end-of-stream buffers, to fix gapless playback of streams
     with encoder padding when the decoder returns a non-empty final buffer.
   * Allow trimming more than one sample when applying an elst audio edit via
     gapless playback info.
   * Allow overriding skipping/scaling with custom `AudioProcessor`s
-    ((#3142)[https://github.com/google/ExoPlayer/issues/3142]).
+    ([#3142](https://github.com/google/ExoPlayer/issues/3142)).
 * Caching:
   * Add release method to the `Cache` interface, and prevent multiple instances
     of `SimpleCache` using the same folder at the same time.

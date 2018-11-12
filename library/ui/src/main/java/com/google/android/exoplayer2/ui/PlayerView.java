@@ -68,6 +68,7 @@ import com.google.android.exoplayer2.util.ErrorMessageProvider;
 import com.google.android.exoplayer2.util.RepeatModeUtil;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.VideoListener;
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
@@ -250,6 +251,7 @@ public class PlayerView extends FrameLayout {
    * Determines when the buffering view is shown. One of {@link #SHOW_BUFFERING_NEVER}, {@link
    * #SHOW_BUFFERING_WHEN_PLAYING} or {@link #SHOW_BUFFERING_ALWAYS}.
    */
+  @Documented
   @Retention(RetentionPolicy.SOURCE)
   @IntDef({SHOW_BUFFERING_NEVER, SHOW_BUFFERING_WHEN_PLAYING, SHOW_BUFFERING_ALWAYS})
   public @interface ShowBuffering {}
