@@ -1233,6 +1233,7 @@ public class PlayerView extends FrameLayout {
         errorMessageView.setText(errorMessage);
         errorMessageView.setVisibility(View.VISIBLE);
       } else {
+        errorMessageView.setText(null);
         errorMessageView.setVisibility(View.GONE);
       }
     }
