@@ -15,12 +15,10 @@
  */
 package com.google.android.exoplayer2.ui;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.support.annotation.AttrRes;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -29,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckedTextView;
 import android.widget.LinearLayout;
+
 import com.google.android.exoplayer2.RendererCapabilities;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
@@ -36,6 +35,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector.SelectionOverride;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.util.Assertions;
+
 import java.util.Arrays;
 
 /** A view for making track selections. */
@@ -264,7 +264,7 @@ public class TrackSelectionView extends LinearLayout {
     }
   }
 
-  private void applySelection() {
+  public void applySelection() {
     DefaultTrackSelector.ParametersBuilder parametersBuilder = trackSelector.buildUponParameters();
     parametersBuilder.setRendererDisabled(rendererIndex, isDisabled);
     if (override != null) {
