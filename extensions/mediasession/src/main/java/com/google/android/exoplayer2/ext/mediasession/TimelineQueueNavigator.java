@@ -36,6 +36,7 @@ import java.util.List;
 public abstract class TimelineQueueNavigator implements MediaSessionConnector.QueueNavigator {
 
   public static final long MAX_POSITION_FOR_SEEK_TO_PREVIOUS = 3000;
+  public static final long MAX_POSITION_FOR_SEEK_TO_PREVIOUS_FORCE = 15000;
   public static final int DEFAULT_MAX_QUEUE_SIZE = 10;
 
   private final MediaSessionCompat mediaSession;
@@ -124,7 +125,7 @@ public abstract class TimelineQueueNavigator implements MediaSessionConnector.Qu
   }
 
   @Override
-  public void onSkipToPrevious(Player player) {
+  public void onSkipToPrevious(Player player, boolean force) {
     Timeline timeline = player.getCurrentTimeline();
     if (timeline.isEmpty() || player.isPlayingAd()) {
       return;
@@ -133,7 +134,8 @@ public abstract class TimelineQueueNavigator implements MediaSessionConnector.Qu
     timeline.getWindow(windowIndex, window);
     int previousWindowIndex = player.getPreviousWindowIndex();
     if (previousWindowIndex != C.INDEX_UNSET
-        && (player.getCurrentPosition() <= MAX_POSITION_FOR_SEEK_TO_PREVIOUS
+        && (player.getCurrentPosition() <=
+            (force ? MAX_POSITION_FOR_SEEK_TO_PREVIOUS_FORCE : MAX_POSITION_FOR_SEEK_TO_PREVIOUS)
             || (window.isDynamic && !window.isSeekable))) {
       player.seekTo(previousWindowIndex, C.TIME_UNSET);
     } else {
