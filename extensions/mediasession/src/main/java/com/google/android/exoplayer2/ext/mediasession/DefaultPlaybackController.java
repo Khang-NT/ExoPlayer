@@ -93,6 +93,15 @@ public class DefaultPlaybackController implements MediaSessionConnector.Playback
     }
 
     @Override
+    public void onTogglePlayPause(Player player) {
+        if (player.getPlayWhenReady()) {
+            onPause(player);
+        } else {
+            onPlay(player);
+        }
+    }
+
+    @Override
     public void onPlay(Player player) {
         player.setPlayWhenReady(true);
     }

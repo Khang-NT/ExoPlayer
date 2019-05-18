@@ -15,6 +15,7 @@
  */
 package com.google.android.exoplayer2.ext.mediasession;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,6 +32,8 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Pair;
+import android.view.KeyEvent;
+
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerLibraryInfo;
@@ -167,6 +170,7 @@ public final class MediaSessionConnector {
      * @return The bitmask of the supported media actions.
      */
     long getSupportedPlaybackActions(@Nullable Player player);
+    void onTogglePlayPause(Player player);
     /** See {@link MediaSessionCompat.Callback#onPlay()}. */
     void onPlay(Player player);
     /** See {@link MediaSessionCompat.Callback#onPause()}. */
@@ -231,7 +235,7 @@ public final class MediaSessionConnector {
      */
     long getActiveQueueItemId(@Nullable Player player);
     /** See {@link MediaSessionCompat.Callback#onSkipToPrevious()}. */
-    void onSkipToPrevious(Player player);
+    void onSkipToPrevious(Player player, boolean force);
     /** See {@link MediaSessionCompat.Callback#onSkipToQueueItem(long)}. */
     void onSkipToQueueItem(Player player, long id);
     /** See {@link MediaSessionCompat.Callback#onSkipToNext()}. */
@@ -843,6 +847,54 @@ public final class MediaSessionConnector {
   }
 
   private class MediaSessionCallback extends MediaSessionCompat.Callback {
+    private static final long REMOTE_CLICK_SLEEP_MS = 300;
+    private Handler handler = null;
+
+    private int clickCount = 0;
+    private Runnable buttonHandler = () -> {
+      if (clickCount == 1) {
+        onTogglePlayPause();
+      } else if (clickCount == 2) {
+        onSkipToNext();
+      } else {
+        onForceSkipToPrevious();
+      }
+      clickCount = 0;
+    };
+
+    private void onRemoteClick() {
+      if (handler == null) {
+        handler = new Handler();
+      }
+      handler.removeCallbacks(buttonHandler);
+      clickCount++;
+      if (clickCount > 2) {
+        buttonHandler.run();
+      } else {
+        handler.postDelayed(buttonHandler, REMOTE_CLICK_SLEEP_MS);
+      }
+    }
+
+    @Override
+    public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
+      KeyEvent keyEvent = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+      if (keyEvent != null) {
+        if (keyEvent.getKeyCode() == KeyEvent.KEYCODE_HEADSETHOOK
+                || keyEvent.getKeyCode() == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) {
+          if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+            onRemoteClick();
+          }
+          return true;
+        }
+      }
+      return super.onMediaButtonEvent(mediaButtonEvent);
+    }
+
+    public void onTogglePlayPause() {
+      if (canDispatchToPlaybackController(PlaybackStateCompat.ACTION_PLAY_PAUSE)) {
+        playbackController.onTogglePlayPause(player);
+      }
+    }
 
     @Override
     public void onPlay() {
@@ -910,7 +962,13 @@ public final class MediaSessionConnector {
     @Override
     public void onSkipToPrevious() {
       if (canDispatchToQueueNavigator(PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)) {
-        queueNavigator.onSkipToPrevious(player);
+        queueNavigator.onSkipToPrevious(player, false);
+      }
+    }
+
+    public void onForceSkipToPrevious() {
+      if (canDispatchToQueueNavigator(PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)) {
+        queueNavigator.onSkipToPrevious(player, true);
       }
     }
 
