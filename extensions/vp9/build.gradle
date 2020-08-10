@@ -39,7 +39,7 @@ android {
 dependencies {
     implementation project(modulePrefix + 'library-core')
     implementation 'com.android.support:support-annotations:' + supportLibraryVersion
-//    androidTestImplementation 'androidx.test:runner:' + testRunnerVersion
+    androidTestImplementation 'androidx.test:runner:' + testRunnerVersion
     androidTestImplementation 'com.google.truth:truth:' + truthVersion
 }
 
