@@ -60,7 +60,7 @@ dependencies {
     implementation 'com.android.support:support-annotations:' + supportLibraryVersion
     compileOnly 'org.checkerframework:checker-qual:' + checkerframeworkVersion
     compileOnly 'org.checkerframework:checker-compat-qual:' + checkerframeworkVersion
-//    androidTestImplementation 'androidx.test:runner:' + testRunnerVersion
+    androidTestImplementation 'androidx.test:runner:' + testRunnerVersion
     androidTestImplementation 'com.google.auto.value:auto-value-annotations:' + autoValueVersion
     androidTestImplementation 'com.google.dexmaker:dexmaker:' + dexmakerVersion
     androidTestImplementation 'com.google.dexmaker:dexmaker-mockito:' + dexmakerVersion
