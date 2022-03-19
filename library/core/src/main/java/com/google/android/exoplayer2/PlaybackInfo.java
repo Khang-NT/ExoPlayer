@@ -17,6 +17,7 @@ package com.google.android.exoplayer2;
 
 import androidx.annotation.CheckResult;
 import androidx.annotation.Nullable;
+
 import com.google.android.exoplayer2.source.MediaSource.MediaPeriodId;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.TrackSelectorResult;
@@ -136,6 +137,11 @@ import com.google.android.exoplayer2.trackselection.TrackSelectorResult;
       long bufferedPositionUs,
       long totalBufferedDurationUs,
       long positionUs) {
+    // test period index
+    // if (!periodId.equals(DUMMY_MEDIA_PERIOD_ID) && !timeline.isEmpty()) {
+    //    timeline.getPeriodByUid(periodId.periodUid, new Timeline.Period());
+    // }
+
     this.timeline = timeline;
     this.manifest = manifest;
     this.periodId = periodId;
@@ -165,6 +171,25 @@ import com.google.android.exoplayer2.trackselection.TrackSelectorResult;
     }
     int firstPeriodIndex =
         timeline.getWindow(timeline.getFirstWindowIndex(shuffleModeEnabled), window)
+            .firstPeriodIndex;
+    return new MediaPeriodId(timeline.getUidOfPeriod(firstPeriodIndex));
+  }
+
+  private MediaPeriodId getDummyMediaPeriodIdForTimeline(Timeline timeline) {
+    if (timeline.isEmpty()) {
+      return DUMMY_MEDIA_PERIOD_ID;
+    }
+    if (timeline.getIndexOfPeriod(periodId.periodUid) > -1) {
+      return periodId;
+    }
+    int oldWindowIndex = this.timeline.isEmpty()
+            ? -1
+            : this.timeline.getPeriodByUid(periodId.periodUid, new Timeline.Period())
+            .windowIndex;
+    Timeline.Window window = new Timeline.Window();
+    int firstPeriodIndex = oldWindowIndex >= 0 && oldWindowIndex < timeline.getWindowCount()
+            ? timeline.getWindow(oldWindowIndex, window).firstPeriodIndex
+            : timeline.getWindow(timeline.getFirstWindowIndex(false), window)
             .firstPeriodIndex;
     return new MediaPeriodId(timeline.getUidOfPeriod(firstPeriodIndex));
   }
@@ -241,7 +266,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelectorResult;
     return new PlaybackInfo(
         timeline,
         manifest,
-        periodId,
+        getDummyMediaPeriodIdForTimeline(timeline),
         startPositionUs,
         contentPositionUs,
         playbackState,
