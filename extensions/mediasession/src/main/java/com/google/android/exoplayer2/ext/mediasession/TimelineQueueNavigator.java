@@ -134,12 +134,12 @@ public abstract class TimelineQueueNavigator implements MediaSessionConnector.Qu
     timeline.getWindow(windowIndex, window);
     int previousWindowIndex = player.getPreviousWindowIndex();
     if (previousWindowIndex != C.INDEX_UNSET
-        && (player.getCurrentPosition() <=
+        && (player.getCurrentPosition() - window.defaultPositionUs <=
             (force ? MAX_POSITION_FOR_SEEK_TO_PREVIOUS_FORCE : MAX_POSITION_FOR_SEEK_TO_PREVIOUS)
             || (window.isDynamic && !window.isSeekable))) {
       player.seekTo(previousWindowIndex, C.TIME_UNSET);
     } else {
-      player.seekTo(0);
+      player.seekTo(C.TIME_UNSET);
     }
   }
 
