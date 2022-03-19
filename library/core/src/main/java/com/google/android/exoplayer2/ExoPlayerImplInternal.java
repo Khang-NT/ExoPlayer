@@ -119,7 +119,7 @@ import java.util.Collections;
   private int pendingPrepareCount;
   private SeekPosition pendingInitialSeekPosition;
   private long rendererPositionUs;
-  private int nextPendingMessageIndex;
+  private int nextPendingMessageIndexHint;
 
   public ExoPlayerImplInternal(
       Renderer[] renderers,
@@ -786,7 +786,6 @@ import java.util.Collections;
         pendingMessageInfo.message.markAsProcessed(/* isDelivered= */ false);
       }
       pendingMessages.clear();
-      nextPendingMessageIndex = 0;
     }
     MediaPeriodId mediaPeriodId =
         resetPosition
@@ -927,6 +926,7 @@ import java.util.Collections;
     // Correct next index if necessary (e.g. after seeking, timeline changes, or new messages)
     int currentPeriodIndex =
         playbackInfo.timeline.getIndexOfPeriod(playbackInfo.periodId.periodUid);
+    int nextPendingMessageIndex = Math.min(nextPendingMessageIndexHint, pendingMessages.size());
     PendingMessageInfo previousInfo =
         nextPendingMessageIndex > 0 ? pendingMessages.get(nextPendingMessageIndex - 1) : null;
     while (previousInfo != null
@@ -969,6 +969,7 @@ import java.util.Collections;
               ? pendingMessages.get(nextPendingMessageIndex)
               : null;
     }
+    nextPendingMessageIndexHint = nextPendingMessageIndex;
   }
 
   private void ensureStopped(Renderer renderer) throws ExoPlaybackException {
