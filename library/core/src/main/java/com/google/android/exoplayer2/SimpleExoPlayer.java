@@ -1143,7 +1143,9 @@ public class SimpleExoPlayer extends BasePlayer
             player.createMessage(renderer).setType(C.MSG_SET_SURFACE).setPayload(surface).send());
       }
     }
-    if (this.surface != null && this.surface != surface) {
+    final Surface _surface = this.surface;
+    final boolean _ownsSurface = this.ownsSurface;
+    if (_surface != null && _surface != surface) {
       // We're replacing a surface. Block to ensure that it's not accessed after the method returns.
       try {
         for (PlayerMessage message : messages) {
@@ -1153,8 +1155,8 @@ public class SimpleExoPlayer extends BasePlayer
         Thread.currentThread().interrupt();
       }
       // If we created the previous surface, we are responsible for releasing it.
-      if (this.ownsSurface) {
-        this.surface.release();
+      if (_ownsSurface) {
+        _surface.release();
       }
     }
     this.surface = surface;
