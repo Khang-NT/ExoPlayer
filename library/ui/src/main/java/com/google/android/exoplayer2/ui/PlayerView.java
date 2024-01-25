@@ -526,7 +526,9 @@ public class PlayerView extends FrameLayout {
         } else if (surfaceView instanceof SphericalSurfaceView) {
           ((SphericalSurfaceView) surfaceView).setVideoComponent(null);
         } else if (surfaceView instanceof SurfaceView) {
-          oldVideoComponent.clearVideoSurfaceView((SurfaceView) surfaceView);
+          new android.os.Handler(this.player.getApplicationLooper()).post(() -> {
+            oldVideoComponent.clearVideoSurfaceView((SurfaceView) surfaceView);
+          });
         }
       }
       Player.TextComponent oldTextComponent = this.player.getTextComponent();
@@ -554,7 +556,9 @@ public class PlayerView extends FrameLayout {
         } else if (surfaceView instanceof SphericalSurfaceView) {
           ((SphericalSurfaceView) surfaceView).setVideoComponent(newVideoComponent);
         } else if (surfaceView instanceof SurfaceView) {
-          newVideoComponent.setVideoSurfaceView((SurfaceView) surfaceView);
+          new android.os.Handler(player.getApplicationLooper()).post(() -> {
+            newVideoComponent.setVideoSurfaceView((SurfaceView) surfaceView);
+          });
         }
         newVideoComponent.addVideoListener(componentListener);
       }
