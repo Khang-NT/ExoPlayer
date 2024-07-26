@@ -32,6 +32,7 @@ public final class CacheDataSourceFactory implements DataSource.Factory {
   private final DataSink.Factory cacheWriteDataSinkFactory;
   private final int flags;
   private final EventListener eventListener;
+  private final CacheKeyFactory cacheKeyFactory;
 
   /**
    * @see CacheDataSource#CacheDataSource(Cache, DataSource)
@@ -57,19 +58,34 @@ public final class CacheDataSourceFactory implements DataSource.Factory {
         new CacheDataSinkFactory(cache, maxCacheFileSize), flags, eventListener);
   }
 
+    public CacheDataSourceFactory(Cache cache, DataSource.Factory upstreamFactory,
+                                  @CacheDataSource.Flags int flags, long maxCacheFileSize,
+                                  EventListener eventListener, CacheKeyFactory cacheKeyFactory) {
+        this(cache, upstreamFactory, new FileDataSourceFactory(),
+                new CacheDataSinkFactory(cache, maxCacheFileSize), flags, eventListener, cacheKeyFactory);
+    }
+
+    public CacheDataSourceFactory(Cache cache, Factory upstreamFactory,
+                                  Factory cacheReadDataSourceFactory, DataSink.Factory cacheWriteDataSinkFactory,
+                                  @CacheDataSource.Flags int flags, EventListener eventListener) {
+        this(cache, upstreamFactory, cacheReadDataSourceFactory,
+                cacheWriteDataSinkFactory, flags, eventListener, null);
+    }
+
   /**
    * @see CacheDataSource#CacheDataSource(Cache, DataSource, DataSource, DataSink, int,
    *     EventListener)
    */
   public CacheDataSourceFactory(Cache cache, Factory upstreamFactory,
       Factory cacheReadDataSourceFactory, DataSink.Factory cacheWriteDataSinkFactory,
-      @CacheDataSource.Flags int flags, EventListener eventListener) {
+      @CacheDataSource.Flags int flags, EventListener eventListener, CacheKeyFactory cacheKeyFactory) {
     this.cache = cache;
     this.upstreamFactory = upstreamFactory;
     this.cacheReadDataSourceFactory = cacheReadDataSourceFactory;
     this.cacheWriteDataSinkFactory = cacheWriteDataSinkFactory;
     this.flags = flags;
     this.eventListener = eventListener;
+    this.cacheKeyFactory = cacheKeyFactory;
   }
 
   @Override
@@ -77,7 +93,7 @@ public final class CacheDataSourceFactory implements DataSource.Factory {
     return new CacheDataSource(cache, upstreamFactory.createDataSource(),
         cacheReadDataSourceFactory.createDataSource(),
         cacheWriteDataSinkFactory != null ? cacheWriteDataSinkFactory.createDataSink() : null,
-        flags, eventListener);
+        flags, eventListener, cacheKeyFactory);
   }
 
 }
