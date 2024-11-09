@@ -356,7 +356,12 @@ public final class HlsPlaylistParser implements ParsingLoadable.Parser<HlsPlayli
                   /* containerMimeType= */ MimeTypes.APPLICATION_M3U8,
                   sampleMimeType,
                   codecs,
-                  /* bitrate= */ Format.NO_VALUE,
+                      // hardcode youtube bitrate
+                  /* bitrate= */"233".equals(groupId)
+                              ? 50000
+                              : "234".equals(groupId)
+                                      ? 135000
+                                      : Format.NO_VALUE,
                   channelCount,
                   /* sampleRate= */ Format.NO_VALUE,
                   /* initializationData= */ null,
